@@ -1,10 +1,11 @@
 import React from 'react';
 import './App.css';
+import Home from './components/MultiStepForm';
 
 function App() {
   return (
     <div>
-      <h1> Multi Step Form in Formik and Yup </h1>
+      <Home />
     </div>
   );
 }
