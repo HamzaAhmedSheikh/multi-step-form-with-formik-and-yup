@@ -4,6 +4,8 @@ import { Field, Form, Formik, FormikConfig, FormikValues } from 'formik';
 import { CheckboxWithLabel, TextField } from 'formik-material-ui';
 import { object, mixed, number } from 'yup';
 
+const sleep = (time: number) => new Promise((acc) => setTimeout(acc, time));
+
 export default function Home () {
   return (
     <Card>
@@ -16,7 +18,11 @@ export default function Home () {
             money: 0,
             description: "",
 
-       }} onSubmit={() => {}}>
+       }} onSubmit={async (values) => {
+           await sleep(3000);
+           console.log('values ===> ', values);
+           
+       }}>
         
           <FormikStep label="Personal Data">
            <Box paddingBottom={2}>
@@ -71,6 +77,7 @@ export function FormikStepper({children, ...props} : FormikConfig<FormikValues>)
   const childrenArray = React.Children.toArray(children) as React.ReactElement<FormikStepProps>[];
   const [step, setStep] = useState(0);
   const currentChild = childrenArray[step] as React.ReactElement<FormikStepProps>; 
+  const [completed, setCompleted] = useState(false);
 
   function isLastStep() {
       return step === childrenArray.length - 1;
@@ -83,9 +90,10 @@ export function FormikStepper({children, ...props} : FormikConfig<FormikValues>)
        validationSchema={currentChild.props.validationSchema}
        onSubmit={async (values, helpers) => {
         if(isLastStep()) {
-            await props.onSubmit(values, helpers);       
+            await props.onSubmit(values, helpers);  
+            setCompleted(true);
+            helpers.resetForm();            
        }  
-
        else {
            setStep(s => s + 1)  
        }
@@ -95,7 +103,7 @@ export function FormikStepper({children, ...props} : FormikConfig<FormikValues>)
         <Form autoComplete="off">
           <Stepper alternativeLabel activeStep={step}>
             {childrenArray.map((child, index) => (
-              <Step key={child.props.label} >
+              <Step key={child.props.label} completed={step > index || completed}>
                 <StepLabel>{child.props.label}</StepLabel>
               </Step>
      ))}
@@ -104,22 +112,30 @@ export function FormikStepper({children, ...props} : FormikConfig<FormikValues>)
           {currentChild}
 
 
-        {/* <Stepper alternativeLabel activeStep={step}>
-          {childrenArray.map((child) => (
-            <Step key={child.props.label}>
-              <StepLabel>{child.props.label}</StepLabel>
-            </Step>
-        ))}
-      </Stepper> */}
-        {/* {children} */}
+     <Grid container spacing={2}>
+        { step > 0 ? (
+           <Grid item>
+             <Button
+                disabled={isSubmitting}
+                color="primary"
+                variant="contained"
+                onClick={() => setStep(s => s-1)}>                     
+              Back
+            </Button> 
+           </Grid>  ) : null }           
 
-     { step > 0 ? (
-         <Button disabled={isSubmitting} color="primary" variant="contained" onClick={() => setStep(s => s-1)}>
-             Back
-         </Button> ) : null }
-         <Button disabled={isSubmitting} color="primary" variant="contained" type="submit"> 
-            {isSubmitting ? "Submitting" : isLastStep() ? 'Submit' : 'Next'}
-         </Button>
+           <Grid item>
+             <Button 
+                startIcon={isSubmitting ? <CircularProgress size='1rem' /> : null}
+                disabled={isSubmitting}
+                color="primary"
+                variant="contained"
+                type="submit"> 
+
+                {isSubmitting ? "Submitting" : isLastStep() ? 'Submit' : 'Next'}
+             </Button>
+           </Grid>
+     </Grid>      
      </Form>
      )}
     </Formik>
