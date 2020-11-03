@@ -20,7 +20,9 @@ export default function Home () {
 
        }} onSubmit={async (values) => {
            await sleep(3000);
-           console.log('values ===> ', values);           
+           console.log('values ===> ', values);     
+           alert(JSON.stringify(values))
+           
        }}>
         
           <FormikStep label="Personal Data">
